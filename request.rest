@@ -4,8 +4,17 @@ GET http://localhost:3000
 ###
 GET http://localhost:3000/posts
 
-###
-POST http://localhost:3000/posts 
+### //filter by id
+GET http://localhost:3000/posts/673c8d534d1406b31f07ea74
 
 ###
-DELETE http://localhost:3000/posts
+POST http://localhost:3000/posts
+Content-Type: application/json
+
+{
+  "title":"Ororbach",
+  "content":"orbach2222",
+  "owner":"o"
+}
+###
+DELETE http://localhost:3000/posts/1
