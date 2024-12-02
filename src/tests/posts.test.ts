@@ -1,9 +1,9 @@
-const request = require('supertest');
-const initApp= require("../server");
-const mongoose =require("mongoose");
-const postModel = require("../models/posts_model");
+import request from "supertest";
+import initApp from "../server";
+import mongoose from "mongoose";
+import postModel from "../models/posts_model";
 
-var app;
+let app=null;
 beforeAll(async()=>{
    app= await initApp();
    console.log('beforeAll');
@@ -15,7 +15,7 @@ afterAll(async()=>{
     await mongoose.connection.close();
 });
 
-var postId="";
+let postId="";
 const testPost={  
     title:"Test title",
     content:"First Test",
