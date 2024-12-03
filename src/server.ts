@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import postRoutes from './routes/post_routes';
+import commentsRoutes from './routes/comments_routes';
+
 
 dotenv.config();
 const app = express();
@@ -14,13 +16,17 @@ const initApp=async()=>{
             db.once("open", function (){
                 console.log("Connected to Mongoose")
             });
+            if (!process.env.DB_CONNECT) {  
+                reject("No DB_CONNECT");
+            }else{
             mongoose.connect(process.env.DB_CONNECT).then(()=>{
             app.use(bodyParser.json());
             app.use(bodyParser.urlencoded({ extended: true }));
-            app.use("/posts",postRoutes);
-                    
-        resolve(app);
-        });
+            app.use("/posts",postRoutes);  
+            app.use("/comments",commentsRoutes);
+            resolve(app);
+            });
+        }
     });
 };   
 export default initApp;
