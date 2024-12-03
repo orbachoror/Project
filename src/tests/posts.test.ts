@@ -2,8 +2,10 @@ import request from "supertest";
 import initApp from "../server";
 import mongoose from "mongoose";
 import postModel from "../models/posts_model";
+import { Express } from "express";  
 
-let app=null;
+let app:Express;
+
 beforeAll(async()=>{
    app= await initApp();
    console.log('beforeAll');
@@ -45,14 +47,14 @@ describe("Posts test suite", ()=>{
 
     test("Test adding invalid post",async()=>{  
         const response=await request(app).post("/posts").send(invalidPost);
-        expect(response.statusCode).not.toBe(400);
+        expect(response.statusCode).toBe(400);
     });
 
 
     test("Test get all posts after adding", async()=>{
         const response=await request(app).get("/posts");
         expect(response.statusCode).toBe(200);
-        expect(response.body.length).toBe(2);
+        expect(response.body.length).toBe(1);
     });
 
     test("Test get post by owner", async()=>{  
