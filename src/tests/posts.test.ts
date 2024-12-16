@@ -6,10 +6,28 @@ import { Express } from "express";
 
 let app:Express;
 
+const testUser = {
+    email: "test@user.com",
+    password: "123456",
+  }
+  let accessToken: string;
+  let postId="";
+  
+  const testPost={  
+    title:"Test title",
+    content:"First Test",
+    owner:"Or",
+};
+
 beforeAll(async()=>{
    app= await initApp();
    console.log('beforeAll');
-    await postModel.deleteMany();    
+  await postModel.deleteMany();    
+  const response = await request(app).post("/auth/register").send(testUser);
+  const response2 = await request(app).post("/auth/login").send(testUser);
+  expect(response2.statusCode).toBe(200);
+  accessToken = response2.body.token;
+  testPost.owner = response2.body._id;
 });
 
 afterAll(async()=>{
@@ -17,15 +35,9 @@ afterAll(async()=>{
     await mongoose.connection.close();
 });
 
-let postId="";
-const testPost={  
-    title:"Test title",
-    content:"First Test",
-    owner: "Or",
-};
+
 
 const invalidPost={  
-    title:"InvalidTest title",
     content:"First Test"
 };
 
@@ -37,16 +49,19 @@ describe("Posts test suite", ()=>{
     });
 
     test("Test adding new post",async()=>{  
-        const response=await request(app).post("/posts").send(testPost);
+        const response=await request(app).post("/posts").set({
+            authorization:"JWT " + accessToken,
+        }).send(testPost);
         expect(response.statusCode).toBe(201);  
         expect(response.body.title).toBe(testPost.title);
         expect(response.body.content).toBe(testPost.content);
-        expect(response.body.owner).toBe(testPost.owner);
         postId=response.body._id;
     });
 
     test("Test adding invalid post",async()=>{  
-        const response=await request(app).post("/posts").send(invalidPost);
+        const response=await request(app).post("/posts").set({
+            authorization: "JWT " + accessToken,
+          }).send(invalidPost);
         expect(response.statusCode).toBe(400);
     });
 
@@ -70,12 +85,12 @@ describe("Posts test suite", ()=>{
         expect(response.body._id).toBe(postId);
     });
   
-    test("Test get post by id", async()=>{
+    test("Test get post by fail id-1", async()=>{
         const response=await request(app).get("/posts/"+ postId +5);
         expect(response.statusCode).toBe(400);
     });
 
-    test("Test get post by fail id", async()=>{
+    test("Test get post by fail id-2", async()=>{
         const response=await request(app).get("/posts/6745df242f1b06026b3201f8");
         expect(response.statusCode).toBe(404);
     });

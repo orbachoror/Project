@@ -4,6 +4,8 @@ import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import postRoutes from './routes/post_routes';
 import commentsRoutes from './routes/comments_routes';
+import authRoutes from './routes/auth_routes';
+
 
 
 dotenv.config();
@@ -24,6 +26,7 @@ const initApp=async()=>{
             app.use(bodyParser.urlencoded({ extended: true }));
             app.use("/posts",postRoutes);  
             app.use("/comments",commentsRoutes);
+            app.use("/auth",authRoutes);
             resolve(app);
             });
         }

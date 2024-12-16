@@ -1,26 +1,37 @@
 import { Request, Response } from "express";
 import { Model } from "mongoose";
 
-class BaseController<T>{
+export class BaseController<T>{
   model:Model<T>;
   constructor(model:Model<T>){
     this.model = model;
   }
+
     async getAll (req:Request , res:Response){
       const filter = {...req.query};
       try {
-       // if (filter) {
           const data = await this.model.find(filter as Partial<T>);
           res.status(200).send(data);
-        // } else {
-        //   const data = await this.model.find();
-        //   res.status(200).send(data);
-        // }
       } catch (error) {
         res.status(400).send(error.message);
       }
     };
     
+  //   async getAll(req: Request, res: Response) {
+  //     const filter = req.query.owner;
+  //     try {
+  //         if (filter) {
+  //             const item = await this.model.find({ owner: filter });
+  //             res.send(item);
+  //         } else {
+  //             const items = await this.model.find();
+  //             res.send(items);
+  //         }
+  //     } catch (error) {
+  //         res.status(400).send(error);
+  //     }
+  // }; 
+
     async getById (req:Request , res:Response)  {
       const id = req.params.id;
       try {
@@ -44,15 +55,6 @@ class BaseController<T>{
     }
   };
     
-  async deleteItem (req:Request , res:Response) {
-      const id = req.params.id;
-      try{
-        await this.model.findByIdAndDelete(id);
-        return res.send("item deleted");
-      }catch(err){
-        return res.status(400).send(err); 
-      } 
-  };
 };
 
 const createController =<T> (model:Model<T>) => { 
