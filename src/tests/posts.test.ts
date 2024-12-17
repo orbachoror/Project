@@ -3,30 +3,36 @@ import initApp from "../server";
 import mongoose from "mongoose";
 import postModel from "../models/posts_model";
 import { Express } from "express";  
+import userModel from "../models/user_model";
 
 let app:Express;
 
 const testUser = {
     email: "test@user.com",
     password: "123456",
+    token:""
+    
   }
-  let accessToken: string;
   let postId="";
-  
+
   const testPost={  
     title:"Test title",
     content:"First Test",
     owner:"Or",
 };
 
+
+
 beforeAll(async()=>{
    app= await initApp();
    console.log('beforeAll');
-  await postModel.deleteMany();    
+  await postModel.deleteMany();
+  await userModel.deleteMany();        
   const response = await request(app).post("/auth/register").send(testUser);
+  expect(response.statusCode).toBe(200);
   const response2 = await request(app).post("/auth/login").send(testUser);
   expect(response2.statusCode).toBe(200);
-  accessToken = response2.body.token;
+  testUser.token = response2.body.token;
   testPost.owner = response2.body._id;
 });
 
@@ -50,9 +56,10 @@ describe("Posts test suite", ()=>{
 
     test("Test adding new post",async()=>{  
         const response=await request(app).post("/posts").set({
-            authorization:"JWT " + accessToken,
+            authorization:"JWT " + testUser.token,
         }).send(testPost);
         expect(response.statusCode).toBe(201);  
+         expect(response.body.owner).toBe(testPost.owner);
         expect(response.body.title).toBe(testPost.title);
         expect(response.body.content).toBe(testPost.content);
         postId=response.body._id;
@@ -60,7 +67,7 @@ describe("Posts test suite", ()=>{
 
     test("Test adding invalid post",async()=>{  
         const response=await request(app).post("/posts").set({
-            authorization: "JWT " + accessToken,
+            authorization: "JWT " + testUser.token,
           }).send(invalidPost);
         expect(response.statusCode).toBe(400);
     });
